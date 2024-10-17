@@ -17,7 +17,7 @@ const isValid = (username)=>{ //returns boolean
 
 const authenticatedUser = (username,password)=>{ //returns boolean
   //write code to check if username and password match the one we have in records.
-  let authUsers = users.filter((user) => {user.username === username && user.password === password});
+  let authUsers = users.filter((user) => {return user.username === username && user.password === password});
   if (authUsers.length > 0) {
     return true;
   } else {
@@ -27,8 +27,8 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  const username = req.params.username;
-  const password = req.params.password;
+  const username = req.body.username;
+  const password = req.body.password;
 
   console.log(`Received username: ${username}, password: ${password}`);
 
