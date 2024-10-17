@@ -50,8 +50,42 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let isbn = req.params.isbn;
+  // extract username from the session
+  let username = req.session.authorization['username'];
+  let review = req.body.review;
+
+  // Check if the book exists
+  if (!books[isbn]) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  let reviewsBasedonISBN = books[isbn].reviews;
+
+  if (!reviewsBasedonISBN[username]){
+    // Add new review
+    reviewsBasedonISBN[username] = review;
+    res.status(201).json({ message: "review successfully added", data: {username: review} });
+  } else {
+    // current user update review
+    books[isbn].reviews[username] = review;
+    res.status(200).json({ message: "new review successfully updated", data: review });
+  }
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  let isbn = req.params.isbn;
+
+  // Check if the book exists
+  if (!books[isbn]) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  if (isbn) {
+    delete books[isbn];
+    res.send("successfully delete");
+  }
+  return res.status(400).json({message: "not found required parameres"});
 });
 
 module.exports.authenticated = regd_users;
