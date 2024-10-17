@@ -3,7 +3,6 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
-const axios = require('axios');
 
 public_users.post("/register", (req,res) => {
   //Write your code here
@@ -24,56 +23,84 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  res.send(JSON.stringify(books, null, 4));
+public_users.get('/', async function (req, res) {
+  try {
+    res.send(JSON.stringify(books, null, 4));
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-  let isbn = req.params.isbn;
-  res.send(books[isbn]);
- });
+public_users.get('/isbn/:isbn', async function (req, res) {
+  try {
+    let isbn = req.params.isbn;
+    if (books[isbn]) {
+      res.send(books[isbn]);
+    } else {
+      res.status(404).json({ message: "Book not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-  //Write your code here
-  let author = req.params.author;
+public_users.get('/author/:author', async function (req, res) {
+  try {
+    let author = req.params.author;
 
-  // return all bookNo based on author
-  let booksBasedonAuthor = () => {
-    let bookNo = [] 
-    for (let key in books) {
-      if (books[key].author === author) {
-        bookNo.push(books[key]);
-      }
+    // Return all books based on author
+    const booksBasedonAuthor = () => {
+      return new Promise((resolve) => {
+        let bookNo = [];
+        for (let key in books) {
+          if (books[key].author === author) {
+            bookNo.push(books[key]);
+          }
+        }
+        resolve(bookNo.length > 0 ? bookNo : null);
+      });
+    };
+
+    const result = await booksBasedonAuthor();
+    
+    if (result) {
+      res.send(JSON.stringify(result, null, 4));
+    } else {
+      res.status(404).json({ message: "No books found!" });
     }
-    return bookNo.length > 0 ? bookNo : null;
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  if (booksBasedonAuthor().length > 0) {
-    res.send(JSON.stringify(booksBasedonAuthor(), null, 4));
-  } else {
-    res.status(404).json({ message: "no books founded! "});
-  }
-
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
-  let title = req.params.title;
-  let booksBasedonTitle = () => {
-    let bookNo = [] 
-    for (let key in books) {
-      if (books[key].title === title) {
-        bookNo.push(books[key]);
-      }
+public_users.get('/title/:title', async function (req, res) {
+  try {
+    let title = req.params.title;
+
+    const booksBasedonTitle = () => {
+      return new Promise((resolve) => {
+        let bookNo = [];
+        for (let key in books) {
+          if (books[key].title === title) {
+            bookNo.push(books[key]);
+          }
+        }
+        resolve(bookNo.length > 0 ? bookNo : null);
+      });
+    };
+
+    const result = await booksBasedonTitle();
+    
+    if (result) {
+      res.send(JSON.stringify(result, null, 4));
+    } else {
+      res.status(404).json({ message: "No books found!" });
     }
-    return bookNo.length > 0 ? bookNo : null;
-  }
-  if (booksBasedonTitle().length > 0) {
-    res.send(JSON.stringify(booksBasedonTitle(), null, 4));
-  } else {
-    res.status(404).json({ message: "no books founded! "});
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
