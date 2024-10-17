@@ -24,13 +24,44 @@ public_users.get('/isbn/:isbn',function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let author = req.params.author;
+
+  // return all bookNo based on author
+  let booksBasedonAuthor = () => {
+    let bookNo = [] 
+    for (let key in books) {
+      if (books[key].author === author) {
+        bookNo.push(books[key]);
+      }
+    }
+    return bookNo.length > 0 ? bookNo : null;
+  }
+
+  if (booksBasedonAuthor().length > 0) {
+    res.send(JSON.stringify(booksBasedonAuthor(), null, 4));
+  } else {
+    res.status(404).json({ message: "no books founded! "});
+  }
+
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let title = req.params.title;
+  let booksBasedonTitle = () => {
+    let bookNo = [] 
+    for (let key in books) {
+      if (books[key].title === title) {
+        bookNo.push(books[key]);
+      }
+    }
+    return bookNo.length > 0 ? bookNo : null;
+  }
+  if (booksBasedonTitle().length > 0) {
+    res.send(JSON.stringify(booksBasedonTitle(), null, 4));
+  } else {
+    res.status(404).json({ message: "no books founded! "});
+  }
 });
 
 //  Get book review
